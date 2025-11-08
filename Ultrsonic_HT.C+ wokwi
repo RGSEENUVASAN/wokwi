@@ -1,0 +1,75 @@
+#include<DHT.h>// import dht library
+#include<WiFi.h>// import wifi library
+#include<ThingSpeak.h>// import thingspeak library
+
+int trigpin = 13;
+int echopin = 12;
+//ultrasonic initialization
+  
+int dhtpin = 15;
+DHT dht22(dhtpin,DHT22);
+//dht initialization
+
+char ssid[] = "Wokwi-GUEST";
+char pass[] = "";
+WiFiClient client;
+//wifi initialization
+
+long int mychannelid = 2660123;
+char mywriteapikey[] = "2QAPALD5WNHN7I4F";
+//thingspeak initialization
+
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(trigpin, OUTPUT);
+  pinMode(echopin, INPUT);
+  //ultrasonic setup
+
+  dht22.begin();
+  //dht setup
+
+  WiFi.mode(WIFI_STA);
+  Serial.print("Attempting to connect");
+  while(WiFi.status() != WL_CONNECTED)
+  {
+    WiFi.begin(ssid,pass);
+    Serial.print(".");
+    delay(5000);
+  }
+  Serial.println("\nConnected");
+  //wifi setup
+
+  ThingSpeak.begin(client);
+  //ThingSpeak setup
+}
+
+void loop() {
+  digitalWrite(trigpin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigpin, LOW);
+  int duration = pulseIn(echopin,HIGH);
+  int distance = duration * 0.034/2;
+  Serial.println(distance);
+  //ultrasonic loop code
+
+  int humidity = dht22.readHumidity();
+  int temp = dht22.readTemperature();
+  Serial.println(humidity);
+  Serial.println(temp);
+  //dht sensor loop
+
+  ThingSpeak.setField(1,humidity);
+  ThingSpeak.setField(2,temp);
+  ThingSpeak.setField(3,distance);
+  int statuscode = ThingSpeak.writeFields(mychannelid,mywriteapikey);
+  if(statuscode == 200)
+    Serial.println("Data uploaded");
+  else
+    Serial.println("Problem writing data");
+  delay(15000);
+
+
+
+}
