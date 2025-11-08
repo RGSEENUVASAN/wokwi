@@ -1,0 +1,34 @@
+#define TRIG_PIN 12
+#define ECHO_PIN 13
+#define BUZZER_PIN 16
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(TRIG_PIN, OUTPUT);  
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+}
+
+void loop() {
+  long duration, distance;
+
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  duration = pulseIn(ECHO_PIN, HIGH);
+  distance = (duration * 0.034 / 10); // Convert to cm
+
+  if (distance < 10) { // Adjust distance threshold as needed
+    digitalWrite(BUZZER_PIN, HIGH); // Turn on buzzer/LED
+  } else {
+    digitalWrite(BUZZER_PIN, LOW); // Turn off buzzer/LED
+  }
+
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+  delay(5000);
+}
